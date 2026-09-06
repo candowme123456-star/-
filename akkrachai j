@@ -1,0 +1,158 @@
+import React from 'react';
+import { BookingRecord } from '../types';
+import { CheckCircle2, QrCode, Printer, X, MapPin, Calendar, Clock, Shirt, Tag, ShieldCheck, Download } from 'lucide-react';
+
+interface BookingTicketModalProps {
+  booking: BookingRecord | null;
+  onClose: () => void;
+  onViewAllBookings: () => void;
+}
+
+export const BookingTicketModal: React.FC<BookingTicketModalProps> = ({
+  booking,
+  onClose,
+  onViewAllBookings,
+}) => {
+  if (!booking) return null;
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+      <div className="bg-zinc-900 rounded-none max-w-lg w-full overflow-hidden shadow-2xl border border-zinc-800 flex flex-col my-auto text-white">
+        {/* Ticket Header */}
+        <div className="bg-zinc-950 p-6 text-center relative border-b border-zinc-800">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="w-12 h-12 bg-zinc-900 border border-lime-400 text-lime-400 flex items-center justify-center mx-auto mb-2 text-2xl shadow-md">
+            ⚽
+          </div>
+          <div className="text-xs font-mono font-black uppercase tracking-widest text-lime-400">
+            KICKOFF ARENA • OFFICIAL DIGITAL MATCH PASS
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white mt-1">
+            การจองสนามสำเร็จเรียบร้อย!
+          </h2>
+          <p className="text-xs text-zinc-400 uppercase tracking-wide mt-1 font-mono">
+            กรุณาแคปหน้าจอหรือแสดงรหัสการจองนี้ที่เคาน์เตอร์เพื่อรับอุปกรณ์
+          </p>
+        </div>
+
+        {/* Ticket Body */}
+        <div className="p-6 space-y-5 bg-zinc-900 relative font-mono">
+          {/* Booking Code Barcode block */}
+          <div className="p-4 bg-zinc-950 border border-zinc-800 text-center">
+            <div className="text-xs text-zinc-400 uppercase font-black tracking-wider">BOOKING IDENTIFIER (PASS CODE)</div>
+            <div className="text-3xl sm:text-4xl font-black text-lime-400 tracking-widest my-2 font-mono">
+              {booking.bookingCode}
+            </div>
+            <div className="inline-flex items-center gap-1.5 text-[11px] text-lime-400 font-bold bg-zinc-900 border border-lime-400/40 px-3 py-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-lime-400" />
+              <span className="uppercase">STATUS: CONFIRMED & ISSUED</span>
+            </div>
+          </div>
+
+          {/* Details list */}
+          <div className="space-y-3 text-xs sm:text-sm">
+            <div className="flex justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-400 uppercase">PITCH / ARENA:</span>
+              <span className="font-sans font-bold text-white text-right uppercase">
+                {booking.pitch.name}
+              </span>
+            </div>
+
+            <div className="flex justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-400 uppercase">MATCH DATE:</span>
+              <span className="font-bold text-white">{booking.date}</span>
+            </div>
+
+            <div className="flex justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-400 uppercase">TIME SLOTS:</span>
+              <span className="font-bold text-lime-400 text-right">
+                {booking.selectedSlots.join(', ')} ({booking.hours} HRS)
+              </span>
+            </div>
+
+            <div className="flex justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-400 uppercase">CUSTOMER / TEAM:</span>
+              <span className="font-bold text-white text-right">
+                {booking.customer.name} {booking.customer.teamName ? `(${booking.customer.teamName})` : ''}
+              </span>
+            </div>
+
+            <div className="flex justify-between pb-2 border-b border-zinc-800">
+              <span className="text-zinc-400 uppercase">CONTACT PHONE:</span>
+              <span className="font-bold text-lime-400 font-mono">{booking.customer.phone}</span>
+            </div>
+          </div>
+
+          {/* Equipment Pick-up Checklist */}
+          {(booking.shoes.length > 0 || booking.bibs.length > 0 || booking.addons.length > 0) && (
+            <div className="p-4 bg-zinc-950 border border-zinc-800 text-xs space-y-2">
+              <div className="font-black uppercase text-lime-400 flex items-center gap-1.5 tracking-wider">
+                <Shirt className="w-4 h-4 text-lime-400" />
+                <span>EQUIPMENT RENTALS AT COUNTER:</span>
+              </div>
+              <ul className="space-y-1 text-zinc-300 pl-4 list-disc text-xs">
+                {booking.shoes.map((s) => (
+                  <li key={s.id}>
+                    รองเท้า {s.brand} {s.modelName} ไซส์ {s.size} ({s.quantity} คู่)
+                  </li>
+                ))}
+                {booking.bibs.map((b) => (
+                  <li key={b.id}>
+                    เสื้อเอี้ยม {b.colorName} ({b.count} ตัว)
+                  </li>
+                ))}
+                {booking.addons.map((a) => (
+                  <li key={a.id}>
+                    {a.name} ({a.count} {a.unit})
+                  </li>
+                ))}
+              </ul>
+              <div className="text-[11px] text-amber-400 font-medium pt-1 border-t border-zinc-800">
+                * เงินมัดจำ ฿{booking.totalDeposit.toLocaleString()} (คืนทันทีเมื่อส่งคืนของหลังจบเกม)
+              </div>
+            </div>
+          )}
+
+          {/* QR code verification area */}
+          <div className="flex items-center justify-center gap-3 p-3 bg-zinc-950 border border-zinc-800">
+            <QrCode className="w-8 h-8 text-lime-400" />
+            <div className="text-left text-[11px] text-zinc-400 font-mono">
+              <div className="font-black uppercase text-white">SCAN CHECK-IN AT RECEPTION</div>
+              <div>ยื่นบัตรดิจิทัลนี้ให้เจ้าหน้าที่เคาน์เตอร์สแกนเช็คอิน</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Actions */}
+        <div className="p-4 bg-zinc-950 border-t border-zinc-800 flex flex-col sm:flex-row gap-2">
+          <button
+            onClick={handlePrint}
+            className="flex-1 py-2.5 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-black uppercase font-mono flex items-center justify-center gap-1.5 transition-colors"
+          >
+            <Printer className="w-4 h-4" />
+            <span>PRINT / SAVE PASS</span>
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              onViewAllBookings();
+            }}
+            className="flex-1 py-2.5 bg-lime-400 hover:bg-lime-300 text-black text-xs font-black uppercase font-mono shadow-md flex items-center justify-center gap-1.5 transition-colors active:translate-y-0.5"
+          >
+            <span>VIEW ALL BOOKINGS</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
